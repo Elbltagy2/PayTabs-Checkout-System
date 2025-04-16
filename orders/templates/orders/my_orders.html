@@ -1,13 +1,37 @@
-<html>
+<!-- myproject/orders/templates/orders/my_orders.html -->
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>PayTabs Payment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
 </head>
 <body>
-    <h1>Complete Your Payment</h1>
-    <iframe 
-        src="https://secure-egypt.paytabs.com/payment/page/5D0D0ACA82E5313B8F25070FCBBAC623DB25A3F5047E8890C03ECBF5/start" 
-        frameborder="0" 
-        style="width: 100%; height: 600px;">
-    </iframe>
+    <h1>My Orders</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.product.name }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>{{ order.status }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No orders found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
