@@ -1,0 +1,32 @@
+<!-- myproject/orders/templates/orders/checkout.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+</head>
+<body>
+    <h1>Checkout - Order ID: {{ order.id }}</h1>
+    <p>Product: {{ order.product.name }}</p>
+    <p>Quantity: {{ order.quantity }}</p>
+    <p>Total: ${{ order.product.price * order.quantity }}</p>
+
+    <h2>Billing Information</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="name">Full Name:</label>
+        <input type="text" name="name" required><br><br>
+        <label for="address">Address:</label>
+        <input type="text" name="address" required><br><br>
+        
+        <!-- Add PayTabs iFrame or a button to submit the payment (to be done) -->
+        <button type="submit">Pay Now</button>
+    </form>
+
+    <script>
+        // Implement AJAX to send payment info and integrate PayTabs iFrame here
+    </script>
+</body>
+</html>
