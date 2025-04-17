@@ -4,43 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        /* Container for better layout */
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        /* Heading Style */
+        h3 {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        /* Order Items Styling */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        /* Payments Section */
+        .payments {
+            margin-top: 20px;
+        }
+
+        /* Link Styling */
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        a:hover {
+            background-color: #45a049;
+        }
+
+        /* Styling for empty message */
+        .empty-message {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-    <h1>Order Details</h1>
 
-    <p><strong>Order ID:</strong> {{ order.id }}</p>
-    <p><strong>Status:</strong> {{ order.status }}</p>
-    <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
+    <div class="container">
+        <h1>Order Details</h1>
 
-    <h3>Order Items:</h3>
-    <ul>
-        {% for item in order_items %}
-            <li>
-                Product: {{ item.product.name }} <br>
-                Quantity: {{ item.quantity }} <br>
-                Price: ${{ item.price }} <br>
-                Total: ${{ item.total_price }}
-            </li>
-        {% empty %}
-            <li>No products in this order.</li>
-        {% endfor %}
-    </ul>
+        <p><strong>Order ID:</strong> {{ order.id }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
 
-    <h3>Payments:</h3>
-    {% if payments %}
+        <h3>Order Items:</h3>
         <ul>
-            {% for payment in payments %}
+            {% for item in order_items %}
                 <li>
-                    Payment Status: {{ payment.payment_status }} <br>
-                    Payment Request: {{ payment.payment_request_payload }} <br>
-                    Payment Response: {{ payment.payment_response_payload }}
+                    <strong>Product:</strong> {{ item.product.name }} <br>
+                    <strong>Quantity:</strong> {{ item.quantity }} <br>
+                    <strong>Price:</strong> ${{ item.price }} <br>
+                    <strong>Total:</strong> ${{ item.total_price }}
                 </li>
+            {% empty %}
+                <li class="empty-message">No products in this order.</li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>No payments found for this order.</p>
-    {% endif %}
 
-    <a href="{% url 'my_orders' %}">Back to My Orders</a>
+        <div class="payments">
+            <h3>Payments:</h3>
+            {% if payments %}
+                <ul>
+                    {% for payment in payments %}
+                        <li>
+                            <strong>Payment Status:</strong> {{ payment.payment_status }} <br>
+                            <strong>Payment Request:</strong> {{ payment.payment_request_payload }} <br>
+                            <strong>Payment Response:</strong> {{ payment.payment_response_payload }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-message">No payments found for this order.</p>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'my_orders' %}">Back to My Orders</a>
+    </div>
+
 </body>
 </html>

@@ -75,9 +75,76 @@
             width: 100%;
             height: 400px;
         }
+
+        /* Styling the form fields */
+        input[type="text"], input[type="email"], input[type="radio"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        h3 {
+            margin-top: 30px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            text-align: center;
+            display: block;
+        }
+
+        button a:hover {
+            background-color: #45a049;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+    <button>
+        <a href="{% url 'home_page' %}">Go to Home</a>
+    </button>
 
     <h1>Checkout</h1>
 
@@ -91,8 +158,8 @@
 
         <div class="shipping-option">
             <label for="shipping">Shipping Option:</label>
-            <input type="radio" id="shipping" name="shipping" value="ship" checked> Ship to address
-            <input type="radio" id="pickup" name="shipping" value="pickup"> Pick up after payment
+            <input type="radio" id="shipping" name="shipping" value="ship" checked required> Ship to address
+            <input type="radio" id="pickup" name="shipping" value="pickup" required> Pick up after payment
         </div>
 
         <h3>Billing Information</h3>
@@ -107,13 +174,13 @@
             <input type="text" id="billing-phone" required><br>
 
             <label for="billing-country">Country:</label>
-            <input type="text" id="billing-country" value="EG" readonly><br>
+            <input type="text" id="billing-country" value="EG" readonly required><br>
 
             <label for="billing-state">State:</label>
-            <input type="text" id="billing-state" value="Cairo"><br>
+            <input type="text" id="billing-state" value="Cairo" required><br>
 
             <label for="billing-city">City:</label>
-            <input type="text" id="billing-city" value="Cairo"><br>
+            <input type="text" id="billing-city" value="Cairo" required><br>
 
             <label for="billing-street">Street Address:</label>
             <input type="text" id="billing-street" required><br>
@@ -132,13 +199,13 @@
             <input type="text" id="shipping-phone" required><br>
 
             <label for="shipping-country">Country:</label>
-            <input type="text" id="shipping-country" value="EG" readonly><br>
+            <input type="text" id="shipping-country" value="EG" readonly required><br>
 
             <label for="shipping-state">State:</label>
-            <input type="text" id="shipping-state" value="Cairo"><br>
+            <input type="text" id="shipping-state" value="Cairo" required><br>
 
             <label for="shipping-city">City:</label>
-            <input type="text" id="shipping-city" value="Cairo"><br>
+            <input type="text" id="shipping-city" value="Cairo" required><br>
 
             <label for="shipping-street">Street Address:</label>
             <input type="text" id="shipping-street" required><br>
@@ -154,7 +221,7 @@
             <iframe id="paytabs-iframe" src=""></iframe>
         </div>
     </div>
-
+   
     <script>
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
@@ -198,9 +265,43 @@
                 quantity: item.quantity
             }));
 
-            const paymentData = {
-                
-            };
+            // Payment data to be sent to backend
+    const paymentData = {
+        profile_id: "132344",
+        tran_type: "sale",
+        tran_class: "ecom",
+        cart_id: "cart_11111",  // Example cart ID
+        cart_currency: "EGP",
+        cart_amount: totalAmount,  // Use the total amount from the cart
+        cart_description: "Description of the items/services",
+        paypage_lang: "en",
+        customer_details: {
+            name: fullName,
+            email: email,
+            phone: phone,
+            country: "EG",
+            state: "Cairo",
+            city: "Cairo",
+            street1: street,
+            zip: zip
+        },
+        shipping_details: {
+            name: shippingFullName,
+            email: shippingEmail,
+            phone: shippingPhone,
+            country: "EG",
+            state: "Cairo",
+            city: "Cairo",
+            street1: shippingStreet,
+            zip: shippingZip
+        },
+        hide_shipping: true,
+        callback: `http://127.0.0.1:8080/failure/`,  // Placeholder for payment_id
+        framed: true,
+        framed_return_top: true,
+        framed_return_parent: true,
+        return: `http://127.0.0.1:8080/success/`  // Placeholder for payment_id
+    };
             let order_id=1;
             console.log(cartData);
             fetch('http://127.0.0.1:8080/create_order/', {  // Ensure the URL is correct
@@ -239,7 +340,7 @@
             })
             .catch(error => {
                 alert("Error: " + error.message);
-            });
+            }); 
 
             
         }

@@ -131,46 +131,9 @@ def process_payment(request):
     if request.method == 'POST':
         body = json.loads(request.body)
         order_id = body.get('order_id')
-        try:
-            # Step 1: Prepare payment data
-            payment_data = {
-                "profile_id": "132344",
-                "tran_type": "sale",
-                "tran_class": "ecom",
-                "cart_id": "cart_11111",  # Example cart ID
-                "cart_currency": "EGP",
-                "cart_amount": 12.3,  # Total amount
-                "cart_description": "Description of the items/services",
-                "paypage_lang": "en",
-                "customer_details": {
-                    "name": "Ahmedelbltagy",
-                    "email": "ahmedelbltagy125@gmail.com",
-                    "phone": "Your Phone Number",
-                    "country": "EG",
-                    "state": "Cairo",
-                    "city": "Cairo",
-                    "street1": "address street",
-                    "zip": "12345"
-                },
-                "shipping_details": {
-                    "name": "Ahmedelbltagy",
-                    "email": "ahmedelbltagy125@gmail.com",
-                    "phone": "Your Phone Number",
-                    "country": "EG",
-                    "state": "Cairo",
-                    "city": "Cairo",
-                    "street1": "shipping address",
-                    "zip": "54321"
-                },
-                # Include the payment ID in the callback URL
-                "callback": f"http://127.0.0.1:8080/failure/{{payment_id}}",  # Placeholder for payment_id
-                "framed": True,
-                "framed_return_top": True,
-                "framed_return_parent": True,
-                "return": "http://127.0.0.1:8080/success/{{payment.id}}",
-            }
-          
-            # Step 2: Create the Payment record in the database (initially with status 'Pending')
+        payment_data = body.get('paymentData', {})
+        try:  
+          # Step 2: Create the Payment record in the database (initially with status 'Pending')
             payment = Payment.objects.create(
                 order=Order.objects.get(id=order_id),  # Link to the order
                 payment_status='Pending',  # Initially set status as 'Pending'
