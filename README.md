@@ -93,7 +93,7 @@ Displays detailed information for each order, including:
 
     Refund requests history (if any).
 
-[Alt text](images/3.png)
+![Alt text](images/3.png)
 3. Create New Order
 
 Allows the user to:
@@ -110,9 +110,9 @@ Allows the user to:
     Integrates with PayTabs' Hosted Payment Page to process payments without page redirection.
 
     Uses AJAX to load the payment form dynamically in an iframe.
-    [Alt text](images/4.png)
-    [Alt text](images/5.png)
-    [Alt text](images/6.png)
+    ![Alt text](images/4.png)
+    ![Alt text](images/5.png)
+    ![Alt text](images/6.png)
 
 Database Design
 
