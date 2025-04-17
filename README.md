@@ -84,7 +84,7 @@ Features
 
 Displays all past orders stored in the database, including the order ID, status, and a link to view order details.
 
-![Alt text](/myproject/images/2)
+![Alt text](/images/2)
 2. Order Details Page
 
 Displays detailed information for each order, including:
@@ -93,7 +93,7 @@ Displays detailed information for each order, including:
 
     Refund requests history (if any).
 
-[Alt text](/myproject/images/3)
+[Alt text](/images/3)
 3. Create New Order
 
 Allows the user to:
@@ -110,9 +110,9 @@ Allows the user to:
     Integrates with PayTabs' Hosted Payment Page to process payments without page redirection.
 
     Uses AJAX to load the payment form dynamically in an iframe.
-    [Alt text](/myproject/images/4)
-    [Alt text](/myproject/images/5)
-    [Alt text](/myproject/images/6)
+    [Alt text](/images/4)
+    [Alt text](/images/5)
+    [Alt text](/images/6)
 
 Database Design
 
