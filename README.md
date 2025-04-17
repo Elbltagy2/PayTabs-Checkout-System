@@ -84,7 +84,7 @@ Features
 
 Displays all past orders stored in the database, including the order ID, status, and a link to view order details.
 
-![Alt text](/images/2)
+![Alt text](images/2.png)
 2. Order Details Page
 
 Displays detailed information for each order, including:
