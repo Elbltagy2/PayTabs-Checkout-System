@@ -163,7 +163,7 @@
             const totalPriceElement = document.getElementById('totalPrice');
             let totalPrice = 0;
 
-            cartItemsList.innerHTML = ''; // Clear previous cart items
+            cartItemsList.innerHTML = ''; // Clear previous cart items  
 
             cart.forEach(item => {
                 const listItem = document.createElement('li');
@@ -193,19 +193,42 @@
             const shippingZip = document.getElementById('shipping-zip').value;
 
             const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            const cartData = cart.map(item => ({
+                id: item.id,
+                quantity: item.quantity
+            }));
 
             const paymentData = {
                 
             };
-
-            // Send the payment data to the Django backend (not directly to PayTabs)
-            fetch('http://127.0.0.1:8080/process_payment/', {
+            let order_id=1;
+            console.log(cartData);
+            fetch('http://127.0.0.1:8080/create_order/', {  // Ensure the URL is correct
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(paymentData)
+                body: JSON.stringify({
+                    cart_data: cartData,  // Send cart data in the correct format
+                })
             })
             .then(response => response.json())
             .then(data => {
+                // Successfully created the order, now get the order ID
+                const order_id = data.order_id;
+                console.log("Order ID: ", order_id);
+            
+                // Step 2: Send the payment data to the Django backend (not directly to PayTabs)
+                return fetch('http://127.0.0.1:8080/process_payment/', {  // Make sure the URL is correct
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        paymentData: paymentData,  // Your payment data
+                        order_id: order_id        // Pass the order ID from the first fetch
+                    })
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response from the payment processing
                 if (data.redirect_url) {
                     document.getElementById('paytabs-iframe').src = data.redirect_url;
                     document.getElementById('payment-form-container').style.display = 'block';
@@ -217,6 +240,8 @@
             .catch(error => {
                 alert("Error: " + error.message);
             });
+
+            
         }
 
         updateCheckoutUI();

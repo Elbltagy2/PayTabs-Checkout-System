@@ -185,12 +185,28 @@
         }
 
         function proceedToCheckout() {
-            localStorage.setItem('cart', JSON.stringify(cart));
-
-            // Redirect to the checkout page
-            window.location.href = 'checkout';  // Change
-
-            // Add your checkout logic here
+            localStorage.setItem('cart', JSON.stringify(cart)); // Store cart in localStorage
+            // Send cart data to the backend to create an order
+            fetch('/create_order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',  // Set the content type to JSON
+                },
+                body: JSON.stringify({ cart_data: cart }),  // Send cart data as JSON string
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.order_id) {
+                    console.log('Order created successfully. Order ID:', data.order_id);
+                    window.location.href = `/checkout/`; // Redirect to checkout page with the order ID
+                } else {
+                    alert('Error creating order');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while creating the order.');
+            });
         }
 
     </script>

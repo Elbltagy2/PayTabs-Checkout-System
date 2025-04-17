@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Order, Product, Payment
+from .models import Order, Product, Payment,OrderItem
 import json
 import requests
 from django.http import JsonResponse
@@ -15,9 +15,27 @@ def my_orders(request):
     orders = Order.objects.all()
     return render(request, 'orders/my_orders.html', {'orders': orders})
 
-def success(request,order_number):
-    # Get the order number from the URL
-    return render(request, 'orders/success.html', {'order_number': order_number})
+def success(request, payment_id):
+    try:
+        # Step 1: Get the Payment record using the payment_id
+        payment = get_object_or_404(Payment, id=payment_id)
+
+        # Step 2: Update the Payment status to "Success"
+        payment.payment_status = 'Success'
+        payment.save()
+
+        # Step 3: Update the related Order status to "Paid"
+        order = payment.order  # The related order is accessible through the Payment model
+        order.status = 'Paid'
+        order.save()
+
+        # Step 4: Render the success page and pass the payment_id
+        return render(request, 'orders/success.html', {'payment_id': payment_id})
+
+    except Exception as e:
+        # Handle any errors that occur (e.g., payment_id not found, etc.)
+        return JsonResponse({'error': str(e)}, status=400)
+
 def failure(request,order_number):
     return render(request, 'orders/failure.html',{'order_number': order_number})
 
@@ -28,28 +46,64 @@ def order_details(request, order_id):
     return render(request, 'orders/order_details.html', {'order': order, 'payment': payment})
 
 # View to create new order
-def create_order(request):
-    if request.method == 'POST':
-        product_id = request.POST['product_id']
-        quantity = request.POST['quantity']
-        product = Product.objects.get(id=product_id)
-        order = Order(product=product, quantity=quantity)
-        order.save()
-        return redirect('checkout', order_id=order.id)
+def home_page(request):
     products = Product.objects.all()
     return render(request, 'orders/home_page.html', {'products': products})
 
-# Checkout view
+@csrf_exempt  # Disable CSRF protection for this view (for testing purposes)
+def create_order(request):
+    if request.method == 'POST':
+        try:
+            # Parse the incoming JSON data (cart data)
+            data = json.loads(request.body)
+            cart_data = data.get('cart_data', [])  # Cart items (list of products and quantities)
+
+            if not cart_data:
+                return JsonResponse({'error': 'Cart is empty'}, status=400)
+
+            # Create the order (initial status: Pending)
+            order = Order.objects.create(status='Pending', total_price=0)
+
+            total_price = 0
+            # Create OrderItems for each product in the cart
+            for item in cart_data:
+                try:
+                    product = Product.objects.get(id=item['id'])  # Fetch product from DB
+                    item_price = product.price * item['quantity']  # Calculate price for this item
+                    
+                    # Create an OrderItem instance for the product
+                    order_item = OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=item['quantity'],
+                        price=product.price
+                    )
+                    total_price += item_price  # Add to total price of the order
+                except Product.DoesNotExist:
+                    return JsonResponse({'error': f'Product {item["id"]} not found'}, status=400)
+
+            # Update the total price for the order
+            order.total_price = total_price
+            order.save()
+
+            # Return the created order id and total price
+            return JsonResponse({'order_id': order.id, 'total_price': total_price})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 def checkout(request):
     return render(request, 'orders/checkout.html')
 
 @csrf_exempt  # Disable CSRF protection for this view (for testing purposes)
 def process_payment(request):
-    order_number='1'
     if request.method == 'POST':
+        body = json.loads(request.body)
+        order_id = body.get('order_id')
         try:
-            # Define the constant payment data (for testing)
+            # Step 1: Prepare payment data
             payment_data = {
                 "profile_id": "132344",
                 "tran_type": "sale",
@@ -60,8 +114,8 @@ def process_payment(request):
                 "cart_description": "Description of the items/services",
                 "paypage_lang": "en",
                 "customer_details": {
-                    "name": "Your Full Name",
-                    "email": "your-email@domain.com",
+                    "name": "Ahmedelbltagy",
+                    "email": "ahmedelbltagy125@gmail.com",
                     "phone": "Your Phone Number",
                     "country": "EG",
                     "state": "Cairo",
@@ -70,8 +124,8 @@ def process_payment(request):
                     "zip": "12345"
                 },
                 "shipping_details": {
-                    "name": "Your Full Name",
-                    "email": "your-email@domain.com",
+                    "name": "Ahmedelbltagy",
+                    "email": "ahmedelbltagy125@gmail.com",
                     "phone": "Your Phone Number",
                     "country": "EG",
                     "state": "Cairo",
@@ -79,28 +133,39 @@ def process_payment(request):
                     "street1": "shipping address",
                     "zip": "54321"
                 },
-                "callback": "http://127.0.0.1:8080/failure/1",
+                # Include the payment ID in the callback URL
+                "callback": f"http://127.0.0.1:8080/failure/{{payment_id}}",  # Placeholder for payment_id
                 "framed": True,
                 "framed_return_top": True,
                 "framed_return_parent": True,
-                "return": "http://127.0.0.1:8080/success/1",
+                "return": "http://127.0.0.1:8080/success/{{payment.id}}",
             }
+          
+            # Step 2: Create the Payment record in the database (initially with status 'Pending')
+            payment = Payment.objects.create(
+                order=Order.objects.get(id=order_id),  # Link to the order
+                payment_status='Pending',  # Initially set status as 'Pending'
+                payment_request_payload=json.dumps(payment_data)  # Save the payment request
+            )
 
-         
+            # Step 3: Update the callback URL with the real payment ID
+            payment_data['callback'] = f"http://127.0.0.1:8080/failure/{payment.id}"
+            payment_data['return']= f"http://127.0.0.1:8080/success/{payment.id}"
+
             # Set the headers for the PayTabs API request
             headers = {
                 'Authorization': 'SWJ992BZTN-JHGTJBWDLM-BZJKMR2ZHT',
                 'Content-Type': 'application/json',
             }
-
-            # Make the POST request to PayTabs API
+            # Step 4: Send the payment request to PayTabs API
             response = requests.post(PAYTABS_API_URL, headers=headers, json=payment_data)
 
             # Handle PayTabs response
             if response.status_code == 200:
                 paytabs_response = response.json()
-                # Log the response from PayTabs
-                print("PayTabs Response:", paytabs_response)
+                # Save the PayTabs response payload in the Payment record
+                payment.payment_response_payload = json.dumps(paytabs_response)
+                payment.save()  # Save the response in the database
 
                 # Return the response back to the frontend (with the payment URL or error)
                 return JsonResponse(paytabs_response)
