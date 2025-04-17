@@ -36,15 +36,44 @@ def success(request, payment_id):
         # Handle any errors that occur (e.g., payment_id not found, etc.)
         return JsonResponse({'error': str(e)}, status=400)
 
-def failure(request,order_number):
-    return render(request, 'orders/failure.html',{'order_number': order_number})
+def failure(request,payment_id):
+    try:
+        # Step 1: Get the Payment record using the payment_id
+        payment = get_object_or_404(Payment, id=payment_id)
 
+        # Step 2: Update the Payment status to "Success"
+        payment.payment_status = 'Failed'
+        payment.save()
+
+        # Step 3: Update the related Order status to "Paid"
+        order = payment.order  # The related order is accessible through the Payment model
+        order.status = 'Paid'
+        order.save()
+
+        # Step 4: Render the success page and pass the payment_id
+        return render(request, 'orders/failure.html',{'payment_id': payment_id})
+
+    except Exception as e:
+        # Handle any errors that occur (e.g., payment_id not found, etc.)
+        return JsonResponse({'error': str(e)}, status=400)
+    
 # View to show order details
 def order_details(request, order_id):
+    # Retrieve the specific order by its ID
     order = get_object_or_404(Order, id=order_id)
-    payment = Payment.objects.filter(order=order).first()
-    return render(request, 'orders/order_details.html', {'order': order, 'payment': payment})
 
+    # Retrieve all order items related to this order
+    order_items = order.items.all()  # Using related_name='items' from OrderItem model
+
+    # Retrieve all payments related to this order
+    payments = Payment.objects.filter(order=order)
+
+    # Render the order details page and pass the order, order_items, and payments to the template
+    return render(request, 'orders/order_details.html', {
+        'order': order,
+        'order_items': order_items,
+        'payments': payments
+    })
 # View to create new order
 def home_page(request):
     products = Product.objects.all()

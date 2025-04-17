@@ -129,6 +129,7 @@
             {% endfor %}
         </div>
     </div>
+   
 
     <div class="cart-container">
         <h2>Your Cart</h2>
@@ -137,8 +138,13 @@
         </ul>
         <div class="total-price" id="totalPrice">Total Price: $0</div>
         <button type="button" class="checkout-btn" id="checkoutButton" style="display:none;" onclick="proceedToCheckout()">Proceed to Checkout</button>
+        
     </div>
-
+    <div>
+        <button style="background-color: #4CAF50; color: white; font-size: 16px; padding: 15px 32px; border: none; border-radius: 8px; cursor: pointer; text-align: center;">
+            <a href="{% url 'my_orders' %}" style="text-decoration: none; color: white; font-size: inherit;">My Orders</a>
+        </button>
+    </div>
     <script>
         let cart = [];
 
