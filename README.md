@@ -31,7 +31,7 @@ Follow these steps to set up the project locally:
 1. Clone the Repository
 
 git clone (https://github.com/Elbltagy2/PayTabs-Checkout-System.git)
-cd myproject
+cd PayTabs-Checkout-System
 
 2. Set Up the Virtual Environment
 
@@ -56,7 +56,7 @@ python manage.py migrate
 
 Run the server locally:
 
-python manage.py runserver
+python manage.py runserver 8080
 
 The application will be available at http://127.0.0.1:8080/.
 Project Structure
